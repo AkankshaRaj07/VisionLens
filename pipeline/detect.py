@@ -48,7 +48,7 @@ except ImportError:
 
 
 # ── Constants ────────────────────────────────────────────────────────────────
-PROCESS_EVERY_N_FRAMES = 3      # sample at ~5fps from 15fps source
+PROCESS_EVERY_N_FRAMES = 5      # sample at ~3fps from 15fps source to speed up execution
 PERSON_CLASS_ID = 0             # COCO class 0 = person
 CONFIDENCE_THRESHOLD = 0.35     # emit low-conf events but flag them
 ENTRY_LINE_FRACTION = 0.5       # horizontal line at 50% of frame height
@@ -170,6 +170,7 @@ def process_clip(
             conf=CONFIDENCE_THRESHOLD,
             tracker="bytetrack.yaml",
             verbose=False,
+            imgsz=480, # Explicitly lower inference resolution for massive speed boost
         )
 
         detections = []
