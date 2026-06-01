@@ -149,6 +149,7 @@ def process_clip(
     frame_idx = 0
     events_emitted = 0
     track_history = {} # track_id -> (cx, cy)
+    frame_time = clip_start_time
 
     while True:
         ret, frame = cap.read()
