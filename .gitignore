@@ -1,0 +1,42 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Data and Clips (Do not push large video files or raw events)
+data/clips/
+data/events/
+*.mp4
+*.avi
+*.mkv
+*.mov
+
+# Ignore raw data files if they are huge
+# We keep store_layout.json and sample events if they are small, but ignore bulk data.
+
+# Logs
+logs/
+*.log
+
+# SQLite Database
+*.sqlite
+*.db
+data/*.db
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

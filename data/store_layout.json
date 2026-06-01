@@ -1,0 +1,15 @@
+{
+  "stores": [
+    {
+      "store_id": "STORE_BLR_002",
+      "zones": [
+        {"zone_id": "MAKEUP"},
+        {"zone_id": "SKINCARE"},
+        {"zone_id": "BATH_AND_BODY"},
+        {"zone_id": "FRAGRANCE"},
+        {"zone_id": "HAIR"},
+        {"zone_id": "PERSONAL_CARE"}
+      ]
+    }
+  ]
+}

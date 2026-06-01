@@ -1,0 +1,35 @@
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - DATABASE_URL=sqlite:////app/data/store_intelligence.db
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    depends_on: []
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    environment:
+      - API_URL=http://api:8000
+      - STORE_ID=STORE_BLR_002
+    depends_on:
+      - api
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
