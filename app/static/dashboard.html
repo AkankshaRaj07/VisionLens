@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Retail | Store Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1rem; }
+        .stat-value { font-size: 2.5rem; font-weight: 700; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Apex Retail <span class="text-blue-400">Intelligence</span></h1>
+                <p class="text-slate-400 mt-1">Live Store Analytics: <span class="font-mono text-white bg-slate-800 px-2 py-1 rounded text-sm">STORE_BLR_002</span></p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <div class="h-3 w-3 bg-green-500 rounded-full blink"></div>
+                <span class="text-green-500 font-medium text-sm tracking-wide uppercase">Live Feed Active</span>
+            </div>
+        </header>
+
+        <!-- Top Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-panel p-6 shadow-xl">
+                <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">Total Visitors Today</h3>
+                <div id="metric-visitors" class="stat-value">0</div>
+            </div>
+            <div class="glass-panel p-6 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path></svg>
+                </div>
+                <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">Conversion Rate</h3>
+                <div id="metric-conversion" class="stat-value">0.0%</div>
+            </div>
+            <div class="glass-panel p-6 shadow-xl">
+                <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">Queue Depth</h3>
+                <div id="metric-queue" class="stat-value text-white">0</div>
+            </div>
+            <div class="glass-panel p-6 shadow-xl">
+                <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-2">Avg Dwell Time</h3>
+                <div id="metric-dwell" class="text-3xl font-bold text-white mt-1">0s</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Funnel Chart -->
+            <div class="glass-panel p-6 shadow-xl lg:col-span-2">
+                <h2 class="text-lg font-semibold mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    Conversion Funnel
+                </h2>
+                <div class="relative h-64 w-full">
+                    <canvas id="funnelChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Anomalies Feed -->
+            <div class="glass-panel p-6 shadow-xl flex flex-col">
+                <h2 class="text-lg font-semibold mb-6 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Live Operations Alerts
+                </h2>
+                <div id="anomalies-container" class="space-y-4 overflow-y-auto flex-1">
+                    <p class="text-slate-500 italic text-sm text-center mt-10">No active anomalies. Operations normal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const storeId = "STORE_BLR_002";
+        const API_BASE = "http://localhost:8000";
+
+        // Initialize Chart
+        const ctx = document.getElementById('funnelChart').getContext('2d');
+        const funnelChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Store Entry', 'Zone Visit', 'Billing Queue', 'Purchase'],
+                datasets: [{
+                    label: 'Unique Visitors',
+                    data: [0, 0, 0, 0],
+                    backgroundColor: [
+                        'rgba(96, 165, 250, 0.8)',
+                        'rgba(167, 139, 250, 0.8)',
+                        'rgba(244, 114, 182, 0.8)',
+                        'rgba(52, 211, 153, 0.8)'
+                    ],
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 13, weight: 500 } } }
+                }
+            }
+        });
+
+        async function fetchMetrics() {
+            try {
+                const res = await fetch(`${API_BASE}/stores/${storeId}/metrics`);
+                const data = await res.json();
+                document.getElementById('metric-visitors').innerText = data.total_unique_visitors;
+                document.getElementById('metric-conversion').innerText = (data.conversion_rate * 100).toFixed(1) + '%';
+                
+                const queueVal = document.getElementById('metric-queue');
+                queueVal.innerText = data.current_queue_depth;
+                queueVal.className = data.current_queue_depth > 5 ? 'stat-value !text-red-400 blink' : 'stat-value text-white';
+
+                document.getElementById('metric-dwell').innerText = `${Math.round(data.avg_dwell_time_sec)}s`;
+            } catch (e) { console.error('Error fetching metrics', e); }
+        }
+
+        async function fetchFunnel() {
+            try {
+                const res = await fetch(`${API_BASE}/stores/${storeId}/funnel`);
+                const data = await res.json();
+                funnelChart.data.datasets[0].data = [
+                    data.entry_count,
+                    data.zone_visit_count,
+                    data.billing_queue_count,
+                    data.purchase_count
+                ];
+                funnelChart.update();
+            } catch (e) { console.error('Error fetching funnel', e); }
+        }
+
+        async function fetchAnomalies() {
+            try {
+                const res = await fetch(`${API_BASE}/stores/${storeId}/anomalies`);
+                const data = await res.json();
+                const container = document.getElementById('anomalies-container');
+                
+                if (data.anomalies.length === 0) {
+                    container.innerHTML = `<p class="text-slate-500 italic text-sm text-center mt-10">No active anomalies. Operations normal.</p>`;
+                    return;
+                }
+
+                container.innerHTML = data.anomalies.map(a => `
+                    <div class="p-4 rounded-lg bg-slate-800 border-l-4 ${a.severity === 'CRITICAL' ? 'border-red-500' : 'border-yellow-500'}">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-bold text-white text-sm">${a.type.replace(/_/g, ' ')}</h4>
+                            <span class="text-xs px-2 py-0.5 rounded ${a.severity === 'CRITICAL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${a.severity}</span>
+                        </div>
+                        <p class="text-sm text-slate-300 mt-2">${a.description}</p>
+                        <div class="mt-3 text-xs bg-slate-900/50 p-2 rounded text-blue-300 border border-slate-700">
+                            <strong>Action:</strong> ${a.suggested_action}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error('Error fetching anomalies', e); }
+        }
+
+        // Initial fetch and poll every 2 seconds
+        fetchMetrics(); fetchFunnel(); fetchAnomalies();
+        setInterval(() => {
+            fetchMetrics();
+            fetchFunnel();
+            fetchAnomalies();
+        }, 2000);
+    </script>
+</body>
+</html>

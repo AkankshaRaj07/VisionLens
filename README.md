@@ -22,9 +22,13 @@ docker compose up --build -d
 pip install -r requirements-pipeline.txt
 bash pipeline/run.sh http://localhost:8000
 
-# 5. Open the live dashboard (in a new terminal)
+# 5. Open the live dashboard
+# Option A: Terminal UI
 pip install rich httpx
 python dashboard/live_dashboard.py --api-url http://localhost:8000 --store-id STORE_BLR_002
+
+# Option B: Web UI (Recommended)
+# Open http://localhost:8000/dashboard in your browser!
 ```
 
 **Verify it works:**

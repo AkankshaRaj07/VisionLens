@@ -4,7 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from pythonjsonlogger import jsonlogger
 
 from app.database import init_db
@@ -97,3 +97,13 @@ async def log_requests(request: Request, call_next):
 app.include_router(health.router)
 app.include_router(events.router)
 app.include_router(stores.router)
+
+import os
+@app.get("/dashboard", response_class=HTMLResponse, tags=["ui"])
+async def serve_dashboard():
+    dashboard_path = os.path.join(os.path.dirname(__file__), "static", "dashboard.html")
+    try:
+        with open(dashboard_path, "r") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(content="<h1>Dashboard UI not found</h1>", status_code=404)
