@@ -114,26 +114,47 @@
             try {
                 const res = await fetch(`${API_BASE}/stores/${storeId}/metrics`);
                 const data = await res.json();
-                document.getElementById('metric-visitors').innerText = data.total_unique_visitors;
-                document.getElementById('metric-conversion').innerText = (data.conversion_rate * 100).toFixed(1) + '%';
+                
+                if (res.status === 404) {
+                    document.getElementById('metric-visitors').innerText = "Waiting...";
+                    document.getElementById('metric-conversion').innerText = "Waiting...";
+                    document.getElementById('metric-queue').innerText = "Waiting...";
+                    document.getElementById('metric-dwell').innerText = "Waiting...";
+                    return;
+                }
+
+                document.getElementById('metric-visitors').innerText = data.unique_visitors || 0;
+                document.getElementById('metric-conversion').innerText = ((data.conversion_rate || 0) * 100).toFixed(1) + '%';
                 
                 const queueVal = document.getElementById('metric-queue');
-                queueVal.innerText = data.current_queue_depth;
-                queueVal.className = data.current_queue_depth > 5 ? 'stat-value !text-red-400 blink' : 'stat-value text-white';
+                queueVal.innerText = data.queue_depth || 0;
+                queueVal.className = data.queue_depth > 5 ? 'stat-value !text-red-400 blink' : 'stat-value text-white';
 
-                document.getElementById('metric-dwell').innerText = `${Math.round(data.avg_dwell_time_sec)}s`;
+                // Calculate global average dwell from the array of zone dwells
+                let totalDwell = 0;
+                let totalVisits = 0;
+                if (data.avg_dwell_per_zone && data.avg_dwell_per_zone.length > 0) {
+                    for (const z of data.avg_dwell_per_zone) {
+                        totalDwell += z.avg_dwell_ms * z.visit_count;
+                        totalVisits += z.visit_count;
+                    }
+                }
+                const avgDwellSec = totalVisits > 0 ? (totalDwell / totalVisits / 1000) : 0;
+                document.getElementById('metric-dwell').innerText = `${Math.round(avgDwellSec)}s`;
             } catch (e) { console.error('Error fetching metrics', e); }
         }
 
         async function fetchFunnel() {
             try {
                 const res = await fetch(`${API_BASE}/stores/${storeId}/funnel`);
+                if (res.status === 404) return;
+                
                 const data = await res.json();
                 funnelChart.data.datasets[0].data = [
-                    data.entry_count,
-                    data.zone_visit_count,
-                    data.billing_queue_count,
-                    data.purchase_count
+                    data.stages.find(s => s.stage === 'Entry')?.count || 0,
+                    data.stages.find(s => s.stage === 'Zone Visit')?.count || 0,
+                    data.stages.find(s => s.stage === 'Billing Queue')?.count || 0,
+                    data.stages.find(s => s.stage === 'Purchase')?.count || 0
                 ];
                 funnelChart.update();
             } catch (e) { console.error('Error fetching funnel', e); }
@@ -142,10 +163,15 @@
         async function fetchAnomalies() {
             try {
                 const res = await fetch(`${API_BASE}/stores/${storeId}/anomalies`);
-                const data = await res.json();
                 const container = document.getElementById('anomalies-container');
                 
-                if (data.anomalies.length === 0) {
+                if (res.status === 404) {
+                    container.innerHTML = `<p class="text-slate-500 italic text-sm text-center mt-10">Waiting for live video feed...</p>`;
+                    return;
+                }
+                
+                const data = await res.json();
+                if (!data.anomalies || data.anomalies.length === 0) {
                     container.innerHTML = `<p class="text-slate-500 italic text-sm text-center mt-10">No active anomalies. Operations normal.</p>`;
                     return;
                 }
@@ -153,7 +179,7 @@
                 container.innerHTML = data.anomalies.map(a => `
                     <div class="p-4 rounded-lg bg-slate-800 border-l-4 ${a.severity === 'CRITICAL' ? 'border-red-500' : 'border-yellow-500'}">
                         <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-white text-sm">${a.type.replace(/_/g, ' ')}</h4>
+                            <h4 class="font-bold text-white text-sm">${a.type ? a.type.replace(/_/g, ' ') : a.anomaly_type.replace(/_/g, ' ')}</h4>
                             <span class="text-xs px-2 py-0.5 rounded ${a.severity === 'CRITICAL' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}">${a.severity}</span>
                         </div>
                         <p class="text-sm text-slate-300 mt-2">${a.description}</p>
