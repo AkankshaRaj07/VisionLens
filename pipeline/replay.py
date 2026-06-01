@@ -55,26 +55,26 @@ def replay(events_dir: str, api_url: str, realtime: bool = False):
     batch = []
     prev_ts = None
 
-    for i, event in enumerate(events):
-        if realtime and prev_ts:
-            curr_ts = event.get("timestamp", "")
-            if curr_ts and prev_ts:
-                try:
-                    delta = (
-                        datetime.fromisoformat(curr_ts.replace("Z", "+00:00")) -
-                        datetime.fromisoformat(prev_ts.replace("Z", "+00:00"))
-                    ).total_seconds()
-                    # Cap delay at 2 seconds for simulation
-                    if 0 < delta < 2:
-                        time.sleep(delta)
-                except Exception:
-                    pass
+    with httpx.Client() as client:
+        for i, event in enumerate(events):
+            if realtime and prev_ts:
+                curr_ts = event.get("timestamp", "")
+                if curr_ts and prev_ts:
+                    try:
+                        delta = (
+                            datetime.fromisoformat(curr_ts.replace("Z", "+00:00")) -
+                            datetime.fromisoformat(prev_ts.replace("Z", "+00:00"))
+                        ).total_seconds()
+                        # Cap delay at 2 seconds for simulation
+                        if 0 < delta < 2:
+                            time.sleep(delta)
+                    except Exception:
+                        pass
 
-        batch.append(event)
-        prev_ts = event.get("timestamp")
+            batch.append(event)
+            prev_ts = event.get("timestamp")
 
-        if len(batch) >= BATCH_SIZE or i == len(events) - 1:
-            with httpx.Client() as client:
+            if len(batch) >= BATCH_SIZE or i == len(events) - 1:
                 try:
                     result = post_batch(client, api_url, batch)
                     total_accepted += result.get("accepted", 0)
@@ -85,7 +85,7 @@ def replay(events_dir: str, api_url: str, realtime: bool = False):
                     )
                 except Exception as exc:
                     print(f"  ERROR posting batch: {exc}")
-            batch = []
+                batch = []
 
     print(f"\n✅ Replay complete. {total_accepted}/{len(events)} events accepted.")
 

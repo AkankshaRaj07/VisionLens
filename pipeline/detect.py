@@ -148,6 +148,7 @@ def process_clip(
 
     frame_idx = 0
     events_emitted = 0
+    track_history = {} # track_id -> (cx, cy)
 
     while True:
         ret, frame = cap.read()
@@ -168,7 +169,7 @@ def process_clip(
             persist=True,
             classes=[PERSON_CLASS_ID],
             conf=CONFIDENCE_THRESHOLD,
-            tracker="bytetrack.yaml",
+            tracker="pipeline/custom_bytetrack.yaml",
             verbose=False,
             imgsz=480, # Explicitly lower inference resolution for massive speed boost
         )
@@ -196,9 +197,21 @@ def process_clip(
                     "zone": zone,
                 })
 
-        # Calculate queue depth for billing camera
+        # Calculate queue depth for billing camera (velocity-based)
         if camera_type == "billing":
-            queue_depth = sum(1 for d in detections if not d["is_staff"] and d["zone"] == "BILLING_COUNTER")
+            queue_depth = 0
+            stationary_threshold = frame_w * 0.03
+            
+            for d in detections:
+                if not d["is_staff"] and d["zone"] == "BILLING_COUNTER":
+                    tid = d["track_id"]
+                    if tid in track_history:
+                        prev_cx, prev_cy = track_history[tid]
+                        dist = np.sqrt((d["cx"] - prev_cx)**2 + (d["cy"] - prev_cy)**2)
+                        if dist < stationary_threshold:
+                            queue_depth += 1
+                    track_history[tid] = (d["cx"], d["cy"])
+            
             for d in detections:
                 if d["zone"] == "BILLING_COUNTER":
                     d["queue_depth"] = queue_depth

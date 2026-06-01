@@ -165,3 +165,13 @@ By overriding the AI and selecting ByteTrack:
 4. **Total Frame Time:** `41ms` (Safely within 66ms budget).
 
 This strict adherence to the math of the physical environment is what guarantees the apex functionality of the final intelligence pipeline.
+
+---
+
+## 6. Conscious Exclusions for Edge CPU Constraints
+
+During the architectural design phase, several advanced Computer Vision techniques were intentionally excluded to guarantee performance on edge CPUs. If this system were deployed with GPU acceleration (e.g., NVIDIA Jetson), the following features would be implemented:
+
+1. **Global Re-Identification (Cross-Camera Tracking):** The current system uses ByteTrack, which is a single-camera tracker. When a customer moves from an Entry camera to a Floor camera, they are assigned a new `visitor_id`. True global ReID requires visual feature extraction models (like OSNet or CLIP) which are computationally heavy and cannot run at 15 FPS on a standard CPU alongside YOLO.
+2. **Homography Projection:** Mapping multiple overlapping 2D camera views into a single top-down 3D store map (to prevent double-counting in overlapping FOVs) requires complex camera calibration matrices and depth estimation. We opted for a simplified zone-based approach.
+3. **Deep Learning Staff Classification:** Our staff exclusion logic relies on deterministic HSV color thresholding rather than a zero-shot classifier to save critical compute cycles.

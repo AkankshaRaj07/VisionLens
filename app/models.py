@@ -1,8 +1,9 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 import uuid
+import hashlib
 
 # ── Event Types ──────────────────────────────────────────────────────────────
 VALID_EVENT_TYPES = {
@@ -38,6 +39,24 @@ class StoreEvent(BaseModel):
     is_staff: bool = False
     confidence: float = Field(..., ge=0.0, le=1.0)
     metadata: EventMetadata = Field(default_factory=EventMetadata)
+
+    @model_validator(mode="before")
+    @classmethod
+    def generate_deterministic_event_id(cls, values: dict) -> dict:
+        if "event_id" not in values or values["event_id"] is None:
+            store_id = values.get("store_id", "")
+            camera_id = values.get("camera_id", "")
+            visitor_id = values.get("visitor_id", "")
+            event_type = values.get("event_type", "")
+            # Ensure timestamp is string for hashing
+            ts = values.get("timestamp", "")
+            if isinstance(ts, datetime):
+                ts = ts.isoformat()
+            
+            hash_input = f"{store_id}_{camera_id}_{visitor_id}_{event_type}_{ts}"
+            m = hashlib.md5(hash_input.encode("utf-8")).hexdigest()
+            values["event_id"] = str(uuid.UUID(m))
+        return values
 
     @field_validator("event_type")
     @classmethod
