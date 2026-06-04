@@ -12,53 +12,57 @@ Rather than treating this as a pure model-building exercise, we designed an **en
 
 ---
 
-## 🚀 Quick Setup in 5 Steps
+<h2 align="center">Quick Setup in 5 Steps</h2>
 
 ---
 
-**1️⃣ Clone the Repository**
+<h3>Step 1: Clone the Repository</h3>
+
 ```bash
 git clone https://github.com/AkankshaRaj07/VisionLens.git && cd VisionLens
 ```
 
-**2️⃣ Place Your Custom Videos**
-*Note: Layout & POS Data are already included in the repo!*
+<h3>Step 2: Place Your Custom Videos</h3>
+
+*Note: Layout & POS Data are already included in the repository!*
 ```bash
 mkdir -p data/clips/STORE_BLR_002
 ```
-> 💡 Drop your CCTV `.mp4` clips directly into `data/clips/STORE_BLR_002/`. Ensure they are named appropriately (e.g. `entry.mp4`, `billing.mp4`).
+> **Important:** Drop your CCTV `.mp4` clips directly into `data/clips/STORE_BLR_002/`. Ensure they are named appropriately (e.g., `entry.mp4`, `billing.mp4`).
 
-**3️⃣ Start the API Services**
+<h3>Step 3: Start the API Services</h3>
+
 ```bash
 docker compose up --build -d
 ```
 
-**4️⃣ Run the Detection Pipeline**
+<h3>Step 4: Run the Detection Pipeline</h3>
+
 First, install the pipeline requirements:
 ```bash
 pip install -r requirements-pipeline.txt
 ```
 Then run the pipeline against your videos:
 
-> 🍎 **Mac / 🐧 Linux:**
+> <kbd>Mac / Linux</kbd>
 > ```bash
 > bash pipeline/run.sh http://localhost:8000
 > ```
 > 
-> 🪟 **Windows (PowerShell):**
+> <kbd>Windows (PowerShell)</kbd>
 > ```powershell
 > .\pipeline\run.ps1 -ApiUrl http://localhost:8000
 > ```
 
-**5️⃣ Open the Live Dashboard**
+<h3>Step 5: Open the Live Dashboard</h3>
 
-> 💻 **Option A: Terminal UI**
+> **Option A:** <kbd>Terminal UI</kbd>
 > ```bash
 > pip install rich httpx
 > python dashboard/live_dashboard.py --api-url http://localhost:8000 --store-id STORE_BLR_002
 > ```
 > 
-> 🌐 **Option B: Web UI (Recommended)**
+> **Option B:** <kbd>Web UI</kbd> *(Recommended)*
 > Open `http://localhost:8000/dashboard` in your browser!
 
 ---
