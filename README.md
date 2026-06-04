@@ -1,6 +1,14 @@
-# Store Intelligence API
+# VisionLens: Store Intelligence API
 
-Real-time retail analytics from CCTV footage. Processes raw video clips through a person detection pipeline (YOLOv8n + ByteTrack) and serves live store metrics via a REST API.
+Welcome to **VisionLens**! This project was built to solve a highly ambiguous, real-world retail problem: **How do we extract meaningful, business-critical metrics from raw, unstructured CCTV footage?**
+
+Rather than treating this as a pure model-building exercise, we designed an **end-to-end intelligence system**. VisionLens ingests raw video feeds, tracks human movement using YOLOv8n + ByteTrack, maps coordinate data to physical store zones, correlates visual tracking with external Point-of-Sale (POS) transactions, and serves the finalized metrics via a high-performance REST API.
+
+### 🌟 Key Capabilities Built:
+* **True Conversion Funnels:** Tracks users strictly from `Store Entry` → `Zone Visit` → `Billing Queue` → `Purchase` without double-counting.
+* **POS Correlation Engine:** Merges external CSV transaction logs with AI visual data to map physical purchases to specific tracked sessions.
+* **Smart Edge-Case Handling:** Uses geometric math to properly handle Entry/Exit line crossings, dynamically filters out store staff based on uniform colors (HSV detection), and maintains session continuity during occlusions or brief camera exits (Re-entry handling).
+* **Live Anomaly Detection:** Automatically flags business anomalies like unexpected queue spikes, dead zones, and sudden conversion rate drops.
 
 ---
 
