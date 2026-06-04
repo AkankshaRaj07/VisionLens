@@ -12,49 +12,56 @@ Rather than treating this as a pure model-building exercise, we designed an **en
 
 ---
 
-## Setup in 5 Commands
+## 🚀 Quick Setup in 5 Steps
 
-### 1. Clone the repo
+---
+
+**1️⃣ Clone the Repository**
 ```bash
 git clone https://github.com/AkankshaRaj07/VisionLens.git && cd VisionLens
 ```
 
-### 2. Place your custom videos (Layout & POS Data are already included!)
+**2️⃣ Place Your Custom Videos**
+*Note: Layout & POS Data are already included in the repo!*
 ```bash
 mkdir -p data/clips/STORE_BLR_002
 ```
-*Note: Drop your CCTV `.mp4` clips directly into `data/clips/STORE_BLR_002/`. Ensure they are named appropriately (e.g. `entry.mp4`, `billing.mp4`).*
+> 💡 Drop your CCTV `.mp4` clips directly into `data/clips/STORE_BLR_002/`. Ensure they are named appropriately (e.g. `entry.mp4`, `billing.mp4`).
 
-### 3. Start the API
+**3️⃣ Start the API Services**
 ```bash
 docker compose up --build -d
 ```
 
-### 4. Run the detection pipeline against the clips
+**4️⃣ Run the Detection Pipeline**
 First, install the pipeline requirements:
 ```bash
 pip install -r requirements-pipeline.txt
 ```
-Then run the pipeline (choose your OS):
+Then run the pipeline against your videos:
 
-**Mac/Linux:**
-```bash
-bash pipeline/run.sh http://localhost:8000
-```
-**Windows (PowerShell):**
-```powershell
-.\pipeline\run.ps1 -ApiUrl http://localhost:8000
-```
+> 🍎 **Mac / 🐧 Linux:**
+> ```bash
+> bash pipeline/run.sh http://localhost:8000
+> ```
+> 
+> 🪟 **Windows (PowerShell):**
+> ```powershell
+> .\pipeline\run.ps1 -ApiUrl http://localhost:8000
+> ```
 
-### 5. Open the live dashboard
-**Option A: Terminal UI**
-```bash
-pip install rich httpx
-python dashboard/live_dashboard.py --api-url http://localhost:8000 --store-id STORE_BLR_002
-```
+**5️⃣ Open the Live Dashboard**
 
-**Option B: Web UI (Recommended)**
-Open `http://localhost:8000/dashboard` in your browser!
+> 💻 **Option A: Terminal UI**
+> ```bash
+> pip install rich httpx
+> python dashboard/live_dashboard.py --api-url http://localhost:8000 --store-id STORE_BLR_002
+> ```
+> 
+> 🌐 **Option B: Web UI (Recommended)**
+> Open `http://localhost:8000/dashboard` in your browser!
+
+---
 
 **Verify it works:**
 **Verify API health:**
