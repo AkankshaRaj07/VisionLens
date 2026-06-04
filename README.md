@@ -8,13 +8,12 @@ Real-time retail analytics from CCTV footage. Processes raw video clips through 
 
 ```bash
 # 1. Clone the repo
-git clone <your-repo-url> && cd store-intelligence
+git clone <your-repo-url> && cd VisionLens
 
-# 2. Place your data
-mkdir -p data/clips data/events
-# Copy CCTV clips to data/clips/STORE_BLR_002/ (or other store folders)
-# Copy store_layout.json and any store layout xlsx files to data/
-# Copy your POS transaction CSV files (e.g., Brigade_Bangalore_10_April_26.csv) to data/
+# 2. Place your custom videos (Layout & POS Data are already included!)
+mkdir -p data/clips/STORE_BLR_002
+# Drop your CCTV .mp4 clips directly into data/clips/STORE_BLR_002/
+# Ensure they are named appropriately (e.g. entry.mp4, billing.mp4)
 
 # 3. Start the API
 docker compose up --build -d
