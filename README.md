@@ -20,7 +20,12 @@ docker compose up --build -d
 
 # 4. Run the detection pipeline against the clips
 pip install -r requirements-pipeline.txt
+
+# On Mac/Linux:
 bash pipeline/run.sh http://localhost:8000
+
+# On Windows (PowerShell):
+.\pipeline\run.ps1 -ApiUrl http://localhost:8000
 
 # 5. Open the live dashboard
 # Option A: Terminal UI
@@ -60,10 +65,16 @@ python -m pipeline.detect \
 
 ```bash
 # Without live API feed (batch)
+# Mac/Linux:
 bash pipeline/run.sh
+# Windows:
+.\pipeline\run.ps1
 
 # With live API feed
+# Mac/Linux:
 bash pipeline/run.sh http://localhost:8000
+# Windows:
+.\pipeline\run.ps1 -ApiUrl http://localhost:8000
 ```
 
 ### Camera types
