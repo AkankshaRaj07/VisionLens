@@ -8,7 +8,7 @@ Real-time retail analytics from CCTV footage. Processes raw video clips through 
 
 ### 1. Clone the repo
 ```bash
-git clone <your-repo-url> && cd VisionLens
+git clone https://github.com/AkankshaRaj07/VisionLens.git && cd VisionLens
 ```
 
 ### 2. Place your custom videos (Layout & POS Data are already included!)
