@@ -6,39 +6,56 @@ Real-time retail analytics from CCTV footage. Processes raw video clips through 
 
 ## Setup in 5 Commands
 
+### 1. Clone the repo
 ```bash
-# 1. Clone the repo
 git clone <your-repo-url> && cd VisionLens
-
-# 2. Place your custom videos (Layout & POS Data are already included!)
-mkdir -p data/clips/STORE_BLR_002
-# Drop your CCTV .mp4 clips directly into data/clips/STORE_BLR_002/
-# Ensure they are named appropriately (e.g. entry.mp4, billing.mp4)
-
-# 3. Start the API
-docker compose up --build -d
-
-# 4. Run the detection pipeline against the clips
-pip install -r requirements-pipeline.txt
-
-# On Mac/Linux:
-bash pipeline/run.sh http://localhost:8000
-
-# On Windows (PowerShell):
-.\pipeline\run.ps1 -ApiUrl http://localhost:8000
-
-# 5. Open the live dashboard
-# Option A: Terminal UI
-pip install rich httpx
-python dashboard/live_dashboard.py --api-url http://localhost:8000 --store-id STORE_BLR_002
-
-# Option B: Web UI (Recommended)
-# Open http://localhost:8000/dashboard in your browser!
 ```
 
+### 2. Place your custom videos (Layout & POS Data are already included!)
+```bash
+mkdir -p data/clips/STORE_BLR_002
+```
+*Note: Drop your CCTV `.mp4` clips directly into `data/clips/STORE_BLR_002/`. Ensure they are named appropriately (e.g. `entry.mp4`, `billing.mp4`).*
+
+### 3. Start the API
+```bash
+docker compose up --build -d
+```
+
+### 4. Run the detection pipeline against the clips
+First, install the pipeline requirements:
+```bash
+pip install -r requirements-pipeline.txt
+```
+Then run the pipeline (choose your OS):
+
+**Mac/Linux:**
+```bash
+bash pipeline/run.sh http://localhost:8000
+```
+**Windows (PowerShell):**
+```powershell
+.\pipeline\run.ps1 -ApiUrl http://localhost:8000
+```
+
+### 5. Open the live dashboard
+**Option A: Terminal UI**
+```bash
+pip install rich httpx
+python dashboard/live_dashboard.py --api-url http://localhost:8000 --store-id STORE_BLR_002
+```
+
+**Option B: Web UI (Recommended)**
+Open `http://localhost:8000/dashboard` in your browser!
+
 **Verify it works:**
+**Verify API health:**
 ```bash
 curl http://localhost:8000/health
+```
+
+**Verify store metrics:**
+```bash
 curl http://localhost:8000/stores/STORE_BLR_002/metrics
 ```
 
@@ -63,17 +80,23 @@ python -m pipeline.detect \
 
 ### Process all clips at once
 
+#### Without live API feed (batch)
+**Mac/Linux:**
 ```bash
-# Without live API feed (batch)
-# Mac/Linux:
 bash pipeline/run.sh
-# Windows:
+```
+**Windows:**
+```powershell
 .\pipeline\run.ps1
+```
 
-# With live API feed
-# Mac/Linux:
+#### With live API feed
+**Mac/Linux:**
+```bash
 bash pipeline/run.sh http://localhost:8000
-# Windows:
+```
+**Windows:**
+```powershell
 .\pipeline\run.ps1 -ApiUrl http://localhost:8000
 ```
 
@@ -89,12 +112,15 @@ bash pipeline/run.sh http://localhost:8000
 
 If you've already run detection and have JSONL files, replay them into the API:
 
+**Batch Replay:**
 ```bash
 python pipeline/replay.py \
   --events-dir data/events \
   --api-url http://localhost:8000
+```
 
-# Simulate real-time (with delays between events)
+**Simulate real-time (with delays between events):**
+```bash
 python pipeline/replay.py \
   --events-dir data/events \
   --api-url http://localhost:8000 \
