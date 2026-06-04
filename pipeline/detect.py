@@ -125,6 +125,7 @@ def process_clip(
     output_path: str,
     api_url: str | None,
     clip_start_time: datetime,
+    fast_mode: bool = False,
 ) -> int:
     if not YOLO_AVAILABLE:
         print("ERROR: ultralytics not installed. Run: pip install -r requirements-pipeline.txt")
@@ -257,6 +258,7 @@ def main():
     parser.add_argument("--layout", default="data/store_layout.json")
     parser.add_argument("--output", required=True, help="Output JSONL path")
     parser.add_argument("--api-url", default=None, help="POST events to API (optional)")
+    parser.add_argument("--fast", action="store_true", help="Enable fast mode for live hackathon demos")
     parser.add_argument(
         "--clip-start-time",
         default=None,
@@ -282,6 +284,7 @@ def main():
         output_path=args.output,
         api_url=args.api_url,
         clip_start_time=clip_start,
+        fast_mode=args.fast,
     )
 
 

@@ -64,6 +64,7 @@ async def get_metrics(store_id: str, db: AsyncSession = Depends(get_db)):
     abandoned_visitors = set(r[0] for r in ab_result.fetchall())
 
     converted = len(billing_visitors - abandoned_visitors)
+
     conversion_rate = round(converted / unique_visitors, 4) if unique_visitors > 0 else 0.0
 
     # Avg dwell per zone

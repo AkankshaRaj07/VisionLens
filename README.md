@@ -13,7 +13,8 @@ git clone <your-repo-url> && cd store-intelligence
 # 2. Place your data
 mkdir -p data/clips data/events
 # Copy CCTV clips to data/clips/STORE_BLR_002/ (or other store folders)
-# Copy store_layout.json to data/
+# Copy store_layout.json and any store layout xlsx files to data/
+# Copy your POS transaction CSV files (e.g., Brigade_Bangalore_10_April_26.csv) to data/
 
 # 3. Start the API
 docker compose up --build -d
@@ -142,6 +143,7 @@ Test coverage target: >70% statement coverage.
 
 See [docs/DESIGN.md](docs/DESIGN.md) for full architecture overview and AI-assisted decisions.
 See [docs/CHOICES.md](docs/CHOICES.md) for model selection, schema design, and API choices.
+See [docs/CODEBASE_REFERENCE.md](docs/CODEBASE_REFERENCE.md) for a detailed breakdown of every file, pipeline step, and API endpoint.
 
 ---
 

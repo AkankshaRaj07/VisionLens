@@ -1,5 +1,6 @@
 param(
-    [string]$ApiUrl = ""
+    [string]$ApiUrl = "",
+    [switch]$FastMode
 )
 
 $ErrorActionPreference = "Stop"
@@ -50,6 +51,9 @@ foreach ($store in $stores) {
             $args += "--api-url"
             $args += $ApiUrl
         }
+        if ($FastMode) {
+            $args += "--fast"
+        }
         
         & python $args
     }
@@ -58,10 +62,14 @@ foreach ($store in $stores) {
 Write-Host "`n✅ All clips processed. Events in $EVENTS_DIR\" -ForegroundColor Green
 
 Write-Host "▶ Correlating POS transactions..." -ForegroundColor Cyan
+
+$PosFiles = Get-ChildItem -Path "data" -Filter "*.csv" | Where-Object { $_.Name -match "pos|brigade" } | Select-Object -First 1
+$PosFile = if ($PosFiles) { $PosFiles.FullName } else { "data\pos_transactions.csv" }
+
 if ($ApiUrl) {
-    & python pipeline\correlate_pos.py --events-dir $EVENTS_DIR --pos-file "data\pos_transactions.csv" --api-url $ApiUrl
+    & python pipeline\correlate_pos.py --events-dir $EVENTS_DIR --pos-file "$PosFile" --api-url $ApiUrl
 } else {
-    & python pipeline\correlate_pos.py --events-dir $EVENTS_DIR --pos-file "data\pos_transactions.csv"
+    & python pipeline\correlate_pos.py --events-dir $EVENTS_DIR --pos-file "$PosFile"
 }
 
 if (!$ApiUrl) {

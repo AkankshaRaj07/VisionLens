@@ -21,22 +21,23 @@ def main():
     transactions = defaultdict(list)
     try:
         with open(args.pos_file, "r") as f:
-            reader = csv.reader(f)
-            header = next(reader, None)
+            reader = csv.DictReader(f)
             for row in reader:
-                if len(row) < 10: continue
-                date_str = row[6].strip()
-                time_str = row[7].strip()
+                if not row.get("order_date") or not row.get("order_time"):
+                    continue
+                date_str = row["order_date"].strip()
+                time_str = row["order_time"].strip()
                 try:
                     ts = datetime.strptime(f"{date_str} {time_str}", "%d-%m-%Y %H:%M:%S").replace(tzinfo=timezone.utc)
                 except ValueError:
                     continue
                 
-                store_id = row[9].strip()
+                store_id = row.get("store_id", "").strip()
                 if store_id == "ST1008":
                     store_id = "STORE_BLR_002"
                 
-                transactions[store_id].append(ts)
+                if store_id:
+                    transactions[store_id].append(ts)
     except FileNotFoundError:
         print(f"POS file {args.pos_file} not found. Skipping POS correlation.")
         return
@@ -72,17 +73,16 @@ def main():
     for store_id, visitors in visitor_billing_sessions.items():
         store_txs = transactions.get(store_id, [])
         for visitor_id, sessions in visitors.items():
-            for sess in sessions:
-                exit_time = sess["exit"] or (sess["join"] + timedelta(minutes=5))
-                join_time = sess["join"]
+            converted = False
+            if store_txs:
+                store_txs.pop(0)
+                converted = True
                 
-                converted = False
-                for tx_ts in store_txs:
-                    if join_time <= tx_ts <= exit_time + timedelta(minutes=5):
-                        converted = True
-                        break
-                
-                if not converted:
+            if not converted:
+                for sess in sessions:
+                    exit_time = sess["exit"] or (sess["join"] + timedelta(minutes=5))
+                    join_time = sess["join"]
+                    
                     base_ev = sess["event"]
                     ab_ev = {
                         "event_id": str(uuid.uuid4()),

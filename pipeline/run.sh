@@ -67,10 +67,16 @@ echo ""
 echo "✅ All clips processed. Events in $EVENTS_DIR/"
 
 echo "▶ Correlating POS transactions..."
+# Find the first available POS/transaction CSV file in data directory
+POS_FILE=$(ls data/*.csv 2>/dev/null | grep -iE "pos|brigade" | head -n 1 || true)
+if [ -z "$POS_FILE" ]; then
+  POS_FILE="data/pos_transactions.csv"
+fi
+
 if [ -n "$API_URL" ]; then
-  python pipeline/correlate_pos.py --events-dir "$EVENTS_DIR" --pos-file "data/pos_transactions.csv" --api-url "$API_URL"
+  python pipeline/correlate_pos.py --events-dir "$EVENTS_DIR" --pos-file "$POS_FILE" --api-url "$API_URL"
 else
-  python pipeline/correlate_pos.py --events-dir "$EVENTS_DIR" --pos-file "data/pos_transactions.csv"
+  python pipeline/correlate_pos.py --events-dir "$EVENTS_DIR" --pos-file "$POS_FILE"
 fi
 
 # If API_URL not set, offer to ingest now
